@@ -1,16 +1,26 @@
-# Assignment 5: smoothie catalog
+# Office Hour Queue
 
-Remember: your app will not run if you do not have two terminals open, one for running the API server (`server/`) and one for the Vue UI (`ui/`).
+### Brief
 
-1. Pull the latest examples repo and copy the `ui/` and `server/` subdirectories of the `lecture16-smoothie-stand/` directory into your assignment directory.
-2. Replace `server/data.ts` with the `data.ts` in your assignment directory.
-3. In `server/setupMongo.ts` there is code to create default customers and operators. Add code to create at least 3 default possible ingredient choices and put them into a MongoDB collection called `possibleIngredients`. For the `_id`s of the ingredients you define, use A, B, C, etc.
-4. The original example code had a `possibleIngredients` variable exported from `server/data.ts`. Change code dependent on the `possibleIngredients` variable to instead get the possible ingredients from MongoDB.
-5. The original example code was dependent on there being an `ingredients` array field in order objects. Change all relevant code in `server/` to use the new `ingredientIds` array field instead. 
-6. Similar to step 5, change the relevant code in `ui/` -- but in the process, make the following changes: (a) show a comma-separated list of ingredient names, not the raw `ingredientIds`, on both the operator and customer screens by using an explicit `:fields` prop and the `formatter` feature (see https://bootstrap-vue.org/docs/components/table#formatter-callback); (b) instead of checkboxes, show a list of "Add X" buttons for each ingredient X; (c) show a list of already added ingredients with delete buttons (hint: use `splice` to delete); (d) also show the total cost for the draft order -- the implementation for adding up the total *must use `reduce`*. NOTE: the implication of this is that ingredient IDs can be duplicated, so if, for example, the ID for strawberries is on the list 3 times, then someone has ordered a triple order of strawberries.
-7. Create a single E2E test in the `tests/` subdirectory that demonstrates creating an order with just one randomly chosen ingredient. *Do not put the name of an ingredient or ingredient ID into your test code.* Your test needs to validate that, after navigating to the operator page, the order shows up with the one ingredient you chose. Your test also needs to work even if there are multiple orders in the queue on the operator page. Hint: use `tr:last-child` (you can assume the orders will be sorted in chronological order by default).
-8. Record a video demo to share with the instructor/TAs/grader on Panopto. The video needs to have the following steps (NOTE: do *not* reset the database between steps):
-  a. Run the E2E test once starting from a blank database. The test should pass.
-  b. Run the E2E test a second time, but while the test is selecting a single random ingredient, manually use the mouse to remove the automatically added ingredient and add a different ingredient. This test should fail due to the substituted ingredient.
-  c. Run the E2E test one more time without any manual interference actions. This test should pass.
-  d. Manually (i.e., no need to make this an E2E test), create a new order by clicking through 3 rounds of all the buttons to add ingredients. For example, if you have 3 possible ingredients, then the draft order should have, in order (by ID): A, B, C, A, B, C, A, B, C. Then, from the top, click the delete button for every other ingredient, and save and submit the order. In a new tab, open an operator page and show that the ingredient list is identical to the order that was placed.
+A platform for students to sign up and briefly describe their problem during office hour. The TA can see all the problems and come to each student in turn.
+
+### How to run this project
+
+1. open any terminal, run `docker run -p 127.0.0.1:27017:27017 -d --rm --name mongo mongo:6.0.2` (since MongoDB is containerized by Docker, and docker is configured as global in my laptop)
+    
+    ![Untitled](README%2040de1f65256b4cb080164084150276be/Untitled.png)
+    
+2. open MongoDB compass, connect
+    
+    ![Untitled](README%2040de1f65256b4cb080164084150276be/Untitled%201.png)
+    
+3. cd to `server/`
+4. run `npm run setup` （如果MongoDB Compass has already started, then skip this step）
+    
+    ![Untitled](README%2040de1f65256b4cb080164084150276be/Untitled%202.png)
+    
+    Then we can see the query in Mongo:
+    
+    ![Untitled](README%2040de1f65256b4cb080164084150276be/Untitled%203.png)
+    
+5. run `npm start` in `/server` and `/ui`
