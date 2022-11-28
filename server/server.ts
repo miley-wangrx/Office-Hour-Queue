@@ -3,12 +3,13 @@ import bodyParser from 'body-parser'
 import pino from 'pino'
 import expressPinoLogger from 'express-pino-logger'
 import { Collection, Db, MongoClient, ObjectId } from 'mongodb'
-import { DraftOrder, Order } from './data'
+import { StudentWithQuestion, DraftOrder, Order } from './data'
 
 // set up Mongo
 const url = 'mongodb://127.0.0.1:27017'
 const client = new MongoClient(url)
 let db: Db
+let students: Collection
 let customers: Collection
 let orders: Collection
 let operators: Collection
@@ -36,22 +37,23 @@ app.get("/api/orders", async (req, res) => {
   res.status(200).json(await orders.find({ state: { $ne: "draft" }}).toArray())
 })
 
-app.get("/api/customer/:customerId", async (req, res) => {
-  const _id = req.params.customerId
-  const customer = await customers.findOne({ _id })
-  if (customer == null) {
+app.get("/api/student/:studentId", async (req, res) => {
+  const _id = req.params.studentId
+  const student = await students.findOne({ studentId: _id })
+  if (student == null) {
     res.status(404).json({ _id })
     return
   }
   // query in mongoDB
-  customer.orders = await orders.find({ customerId: _id, state: { $ne: "draft" } }).toArray()
-  res.status(200).json(customer)
+  // student.orders = await orders.find({ customerId: _id, state: { $ne: "draft" } }).toArray()
+  // student. = await orders.find({ customerId: _id, state: { $ne: "draft" } }).toArray()
+  // res.status(200).json(student)
 })
 
 app.get("/api/operator/:operatorId", async (req, res) => {
   const _id = req.params.operatorId
   // findOne: tell mango that only give me one, since there's only one draft order
-  // hint: draft oeder is like a shopping cart
+  // hint: draft order is like a shopping cart
   const operator = await operators.findOne({ _id })
   if (operator == null) {
     res.status(404).json({ _id })
@@ -70,47 +72,37 @@ app.get("/api/customer/:customerId/draft-order", async (req, res) => {
   res.status(200).json(draftOrder || { customerId, ingredientIds: [] })
 })
 
-app.put("/api/customer/:customerId/draft-order", async (req, res) => {
-  const order: DraftOrder = req.body
-
-  // TODO: validate customerId
-  // only one worker can get any work item at a time
-  const result = await orders.updateOne(
-    {
-      customerId: req.params.customerId,
-      state: "draft",
-    },
-    {
-      $set: {
-        ingredientIds: order.ingredientIds
+app.put("/api/student/:studentId/draft-question", async (req, res) => {
+    const student: StudentWithQuestion = req.body
+    const result = await students.updateOne(
+      {
+        studentId: req.params.studentId,
+      },
+      {
+        $set: {
+          question: student.question
+        }
+      },
+      {
+        upsert: true
       }
-    },
-    // upsert: combination of update and insert
-    // if there's no draft order yet, create one; otherwise update the existed one
-    {
-      upsert: true
-    }
-  )
-  res.status(200).json({ status: "ok" })
-})
+    )
+    res.status(200).json({ status: "ok" })
+  })
 
-app.post("/api/customer/:customerId/submit-draft-order", async (req, res) => {
-  //update第一个找到的
-  const result = await orders.updateOne(
-    //查询条件
+app.post("/api/student/:studentId/submit-draft-question", async (req, res) => {
+  const result = await students.updateOne(
     {
-      customerId: req.params.customerId,
-      state: "draft",
+      studentId: req.params.studentId,
     },
-    //进行的操作
     {
       $set: {
-        state: "queued",
+        // state: "queued",
       }
     }
   )
   if (result.modifiedCount === 0) {
-    res.status(400).json({ error: "no draft order" })
+    res.status(400).json({ error: "no draft question" })
     return
   }
   res.status(200).json({ status: "ok" })
@@ -118,9 +110,7 @@ app.post("/api/customer/:customerId/submit-draft-order", async (req, res) => {
 
 app.put("/api/order/:orderId", async (req, res) => {
   const order: Order = req.body
-
   // TODO: validate order object
-
   const condition: any = {
     _id: new ObjectId(req.params.orderId),
     state: { 
@@ -171,6 +161,7 @@ client.connect().then(() => {
   orders = db.collection('orders')
   customers = db.collection('customers')
   possibleIngredients = db.collection('possibleIngredients')
+  students = db.collection('students')
 
   // start server
   app.listen(port, () => {

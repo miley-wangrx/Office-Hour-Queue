@@ -1,8 +1,8 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 import App from '@/App.vue'
-import CustomerScreen from '@/views/CustomerScreen.vue'
-import OperatorScreen from '@/views/OperatorScreen.vue'
+import CustomerScreen from '@/views/StudentScreen.vue'
+import OperatorScreen from '@/views/StaffScreen.vue'
 import StatusScreen from '@/views/StatusScreen.vue'
 
 import { BootstrapVue, BootstrapVueIcons } from "bootstrap-vue"
@@ -18,9 +18,9 @@ const router = new VueRouter({
   mode: "history",
   routes: [
     {
-      path: "/customer/:customerId",
+      path: "/student/:studentId",
       component: CustomerScreen,
-      props: ({ params: { customerId }}) => ({ customerId }),
+      props: ({ params: { studentId }}) => ({ studentId }),
     },
     {
       path: "/operator/:operatorId",

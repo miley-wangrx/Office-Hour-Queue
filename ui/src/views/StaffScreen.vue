@@ -1,9 +1,9 @@
 <template>
   <div class="mx-3 my-3">
-    <b-jumbotron bg-variant="info" text-variant="white" :header="`Work Screen for ${name}`" />
-    <h2>Orders</h2>
+    <b-jumbotron bg-variant="info" text-variant="white" :header="`Current Queue`" />
+    <h2>Questions</h2>
     <b-button @click="refresh" class="mb-2">Refresh</b-button>
-    <b-table :items="orders" :fields="fields">
+    <b-table :items="studentwithquestion" :fields="fields">
       <template #cell(operatorId)="cellScope">
         <span v-if="cellScope.value">
           {{ cellScope.value }}
@@ -19,7 +19,7 @@
 
 <script setup lang="ts">
 import { onMounted, ref, computed, Ref } from 'vue'
-import { Ingredient, Operator, Order } from "../../../server/data"
+import { Ingredient, Operator, Order, StudentWithQuestion } from "../../../server/data"
 
 // props
 interface Props {
@@ -32,7 +32,8 @@ const props = withDefaults(defineProps<Props>(), {
 })
 
 const operator: Ref<Operator | null> = ref(null)
-const orders: Ref<Order[]> = ref([])
+// const orders: Ref<Order[]> = ref([])
+const studentwithquestion: Ref<StudentWithQuestion[]> = ref([])
 const possibleIngredients: Ref<Ingredient[]> = ref([])
 const name = computed(() => operator.value?.name || props.operatorId)
 
@@ -42,18 +43,18 @@ async function refresh() {
   if (props.operatorId) {
     operator.value = await (await fetch("/api/operator/" + encodeURIComponent(props.operatorId))).json()
   }
-  orders.value = await (await fetch("/api/orders/")).json()
+  studentwithquestion.value = await (await fetch("/api/orders/")).json()
 }
 onMounted(refresh)
 
-const fields = ["_id", "customerId", "state", 
-  {
-    key: 'ingredientIds',
-    label: 'Ingredients',
-    formatter: (ingredientIds: string[]) => 
-      ingredientIds.map(_id => possibleIngredients.value.find(ingredients => ingredients._id == _id)?.name).join(', ') 
-  },
-  "operatorId"]
+const fields = ["Position", "Student Name", "Question"
+  // {
+  //   key: 'ingredientIds',
+  //   label: 'Ingredients',
+  //   formatter: (ingredientIds: string[]) => 
+  //     ingredientIds.map(_id => possibleIngredients.value.find(ingredients => ingredients._id == _id)?.name).join(', ') 
+  // }
+  ]
 
 async function updateOrder(orderId: string, state: string) {
   await fetch(

@@ -28,3 +28,15 @@ export interface Operator {
   _id: string
   name: string
 }
+
+// export interface DraftQuestion {
+
+// }
+
+
+export interface StudentWithQuestion {
+  studentId: string
+  name: string
+  question: string
+  position: number
+}
