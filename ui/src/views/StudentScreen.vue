@@ -2,17 +2,20 @@
   <body class="bg">
 
   <div class="pg">
-    <b-jumbotron class="welcome" bg-variant="white" text-variant="black" :header="`Welcome, student`" />
+    <!--b-jumbotron bg-variant="white" text-variant="black" :header="`Welcome, student`" /-->
+    <div class="welcome">
+      <p> Welcome, student </p>
+    </div>
     <b-card-group deck class="bcard">
-    <b-card title="Sign Up" >
+    <b-card title="Please write down:" >
       <div class="bcard-element">
-        <p>Please enter your name:</p>
+        <p class="form-section">Your name:</p>
         <b-form-input v-model="name" class="mb-2" />
       </div>
       <div class="bcard-element">
-        <p>In a few words, briefly explain your question:</p>
+        <p class="form-section">In a few words, briefly explain your question:</p>
         <b-form-textarea v-model="question" class="mb-2" rows="3" />
-        Note: must save before submitting
+        <em>Note: must save before submitting</em>
       </div>
         <b-button @click="save">Save</b-button> &emsp; <b-button @click="submit">Submit</b-button> 
       <div>
@@ -20,12 +23,12 @@
     </b-card>
     <b-card title="Preview">
       <div class="bcard-element">
-        <p> Name: </p>
-        <p> {{ name }} </p>
+        <p class="form-section"> Name: </p>
+        <p><em> {{ name }} </em></p>
       </div>
       <div class="bcard-element">
-        <p> Question: </p>
-        <p> {{question}} </p>
+        <p class="form-section">  Question: </p>
+        <p><em>{{question}} </em></p>
       </div>
     </b-card>
     </b-card-group>
@@ -144,8 +147,7 @@ async function submit() {
 
 <style scoped>
 .bg {
-  background-color: cadetblue;
-  background-image: url('assets/index_cover.jpeg');
+  background-image: url('assets/student_bg.jpeg');
   background-position: center center;
   background-repeat: no-repeat;
   background-attachment: fixed;
@@ -153,34 +155,47 @@ async function submit() {
 }
 
 .pg {
-    height: 100%;
-    width: 100%;
-    padding-top: 2%;
-    padding-bottom: 2%;
-    padding-left: 2%;
-    padding-right: 2%;
+  padding-top: 2%;
+  padding-bottom: 2%;
+  padding-left: 2%;
+  padding-right: 2%;
 }
 
 .welcome {
+  background-color: white;
   opacity: 0.8;
-  height: 20%;
+  border-radius: 5px;
+  padding-top: 3%;
+  padding-bottom: 2%;
+  padding-left: 2%;
+  font-size: 70px;
+  font-weight: 400;
 }
+
 .bcard {
+  margin-top: 2%;
+  margin-bottom: 2%;
   opacity:0.8;
 }
+
 .bcard-element {
   padding-bottom: 3%;
 }
+
+.form-section {
+  font-weight: 500;
+}
+
 .bottom-card {
   font-size: xx-large;
-  font-style: italic;
+  /*font-style: italic;*/
   font-weight: 300;
   /*font-family: Georgia, 'Times New Roman', Times, serif;*/
-  color:beige;
+  color:white;
   text-shadow:0.03em 0.03em whitesmoke;
   text-align: center;
-  margin-top: 1%;
-  margin-bottom: 1%;
+  margin-top: 3%;
+  margin-bottom: 3%;
 }
 
 </style>

@@ -1,5 +1,13 @@
 <template>
-  <div class="mx-3 my-3">
+  <body class="bg">
+  <div class="pg">
+    <div class="welcome">
+      <p> Welcome, staff </p>
+    </div>
+    
+  </div>
+  </body>
+  <!--div class="mx-3 my-3">
     <b-jumbotron bg-variant="info" text-variant="white" :header="`Current Queue`" />
     <h2>Questions</h2>
     <b-button @click="refresh" class="mb-2">Refresh</b-button>
@@ -14,7 +22,7 @@
         <b-button v-else @click="updateOrder(cellScope.item._id, 'blending')">Start Blending</b-button>
       </template>
     </b-table>
-  </div>
+  </div-->
 </template>
 
 <script setup lang="ts">
@@ -38,10 +46,9 @@ const possibleIngredients: Ref<Ingredient[]> = ref([])
 const name = computed(() => operator.value?.name || props.operatorId)
 
 async function refresh() {
-  possibleIngredients.value = await (await fetch("/api/possible-ingredients")).json()
-
+  // possibleIngredients.value = await (await fetch("/api/possible-ingredients")).json
   if (props.operatorId) {
-    operator.value = await (await fetch("/api/operator/" + encodeURIComponent(props.operatorId))).json()
+    operator.value = await (await fetch("/api/staff/" + encodeURIComponent(props.operatorId))).json()
   }
   studentwithquestion.value = await (await fetch("/api/orders/")).json()
 }

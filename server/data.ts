@@ -37,6 +37,11 @@ export interface Operator {
 export interface StudentWithQuestion {
   studentId: string
   name: string
-  question: string
+  question?: string
   position: number
+}
+
+export interface RegisteredUsers {
+  username: string
+  password: string
 }

@@ -3,7 +3,7 @@ import bodyParser from 'body-parser'
 import pino from 'pino'
 import expressPinoLogger from 'express-pino-logger'
 import { Collection, Db, MongoClient, ObjectId } from 'mongodb'
-import { StudentWithQuestion, DraftOrder, Order } from './data'
+import { RegisteredUsers, StudentWithQuestion, DraftOrder, Order } from './data'
 
 // set up Mongo
 const url = 'mongodb://127.0.0.1:27017'

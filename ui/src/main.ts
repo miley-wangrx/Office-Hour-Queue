@@ -4,6 +4,7 @@ import App from '@/App.vue'
 import CustomerScreen from '@/views/StudentScreen.vue'
 import OperatorScreen from '@/views/StaffScreen.vue'
 import StatusScreen from '@/views/StatusScreen.vue'
+import SignupScreen from '@/views/SignupScreen.vue'
 
 import { BootstrapVue, BootstrapVueIcons } from "bootstrap-vue"
 
@@ -18,19 +19,23 @@ const router = new VueRouter({
   mode: "history",
   routes: [
     {
+      path: "/signup",
+      component: SignupScreen,
+    },
+    {
       path: "/student/:studentId",
       component: CustomerScreen,
       props: ({ params: { studentId }}) => ({ studentId }),
     },
     {
-      path: "/operator/:operatorId",
+      path: "/staff/:operatorId",
       component: OperatorScreen,
       props: ({ params: { operatorId }}) => ({ operatorId }),
     },
     {
       path: "/",
       component: StatusScreen,
-    }
+    },
   ],
 })
 
