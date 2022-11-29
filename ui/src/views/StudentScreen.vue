@@ -1,55 +1,48 @@
 <template>
-  <div class="mx-3 my-3">
-    <b-jumbotron bg-variant="primary" text-variant="white" :header="`Welcome, student`" />
-    <b-card-group deck>
-    <b-card title="Sign Up">
-      <div class>
+  <body class="bg">
+
+  <div class="pg">
+    <b-jumbotron class="welcome" bg-variant="white" text-variant="black" :header="`Welcome, student`" />
+    <b-card-group deck class="bcard">
+    <b-card title="Sign Up" >
+      <div class="bcard-element">
         <p>Please enter your name:</p>
-        <b-form-input v-model="name" class="mb-2" /> <br>
+        <b-form-input v-model="name" class="mb-2" />
       </div>
-      <p>In a few words, briefly explain your question:</p>
-      <b-form-input v-model="question" class="mb-4" /> <br>
+      <div class="bcard-element">
+        <p>In a few words, briefly explain your question:</p>
+        <b-form-textarea v-model="question" class="mb-2" rows="3" />
+        Note: must save before submitting
+      </div>
+        <b-button @click="save">Save</b-button> &emsp; <b-button @click="submit">Submit</b-button> 
       <div>
-      <b-button @click="save">Save</b-button> &emsp; <b-button @click="submit">Submit</b-button> <br>
-      Note: must save before submitting
       </div>
     </b-card>
-
     <b-card title="Preview">
-      <div>
-      <p> Name: {{ name }} </p>
-      <p> Question: {{question}} </p>
+      <div class="bcard-element">
+        <p> Name: </p>
+        <p> {{ name }} </p>
+      </div>
+      <div class="bcard-element">
+        <p> Question: </p>
+        <p> {{question}} </p>
       </div>
     </b-card>
+    </b-card-group>
 
-  </b-card-group>
-
-    <!--b-form-checkbox-group v-model="draftOrderIngredients" :options="possibleIngredients" /-->
-    <!--p><b-button @click="draftOrderIngredientIds.push(possibleIngredient._id)" 
-      v-for="possibleIngredient in possibleIngredients"> 
-        Add {{ possibleIngredient.name }}
-    </b-button></p-->
-    <!-- Display what has been added -->
-    <div>
-      <h3> Hi {{name}}, your position in the queue is: {{position}} </h3>
+    <div class="bottom-card">
+      <p> Hi {{name}}, your position in the queue is: {{position}} </p>
       <b-button @click="leaveQueue" class="mb-2">Leave the Queue</b-button>
-      <!--div v-for="draftOrderIngredientId, i in draftOrderIngredientIds">
-      {{ possibleIngredients.find(ingredient => ingredient._id == draftOrderIngredientId)?.name }}
-      <b-button @click="draftOrderIngredientIds.splice(i, 1)"> Delete </b-button>
-      </div-->
     </div>
-    <div>
+    <!--div>
       <p> Total Cost: </p>
       {{ draftOrderIngredientIds.reduce(
         (acc, curr) => acc + (possibleIngredients.find(c => c._id == curr)?.price || 0 ), 0
       )
       }}
-    </div>
-    
-    <div class="mt-2">
-      
-    </div>
+    </div-->
   </div>
+</body>
 </template>
 
 <script setup lang="ts">
@@ -73,8 +66,8 @@ const props = withDefaults(defineProps<Props>(), {
 const student: Ref<StudentWithQuestion | null> = ref(null)
 
 const name = computed(() => student.value?.name || props.studentId)
-const question = computed(() => student.value?.question || props.studentId)
-const position = computed(() => student.value?.question || 0)
+const question: Ref<string | null> = ref(null)
+const position = computed(() => student.value?.position || 0)
 
 const draftOrderIngredientIds: Ref<string[]> = ref([])
 const possibleIngredients: Ref<Ingredient[]> = ref([])
@@ -88,35 +81,14 @@ const fields = ["_id", "state",
 ]
 
 async function refresh() {
-  student.value = await (await fetch("/api/possible-ingredients")).json()
-
+  // student.value = await (await fetch("/api/possible-ingredients")).json()
   if (props.studentId) {
     student.value = await (await fetch("/api/student/" + encodeURIComponent(props.studentId))).json()
-    draftOrderIngredientIds.value = (await (await fetch("/api/student/" + encodeURIComponent(props.studentId) + "/draft-order")).json())?.ingredientIds || []
+    question.value = student.value?.question || 'Please enter your question'
+    draftOrderIngredientIds.value = (await (await fetch("/api/student/" + encodeURIComponent(props.studentId) + "/draft-question")).json())?.ingredientIds || []
   }
 }
 onMounted(refresh)
-
-// async function save() {
-//   await fetch(
-//     "/api/customer/" + encodeURIComponent(props.customerId) + "/draft-order",
-//     {
-//       headers: {
-//         "Content-Type": "application/json",
-//       },
-//       method: "PUT",
-//       body: JSON.stringify({ ingredientIds: draftOrderIngredientIds.value })
-//     }
-//   )
-// }
-
-// async function submit() {
-//   await fetch(
-//     "/api/customer/" + encodeURIComponent(props.customerId) + "/submit-draft-order",
-//     { method: "POST" }
-//   )
-//   await refresh()
-// }
 
 function leaveQueue() {
 
@@ -147,4 +119,68 @@ async function submit() {
   await refresh()
 }
 
+// async function save() {
+//   await fetch(
+//     "/api/customer/" + encodeURIComponent(props.customerId) + "/draft-order",
+//     {
+//       headers: {
+//         "Content-Type": "application/json",
+//       },
+//       method: "PUT",
+//       body: JSON.stringify({ ingredientIds: draftOrderIngredientIds.value })
+//     }
+//   )
+// }
+
+// async function submit() {
+//   await fetch(
+//     "/api/customer/" + encodeURIComponent(props.customerId) + "/submit-draft-order",
+//     { method: "POST" }
+//   )
+//   await refresh()
+// }
+
 </script>
+
+<style scoped>
+.bg {
+  background-color: cadetblue;
+  background-image: url('assets/index_cover.jpeg');
+  background-position: center center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  background-size: cover;
+}
+
+.pg {
+    height: 100%;
+    width: 100%;
+    padding-top: 2%;
+    padding-bottom: 2%;
+    padding-left: 2%;
+    padding-right: 2%;
+}
+
+.welcome {
+  opacity: 0.8;
+  height: 20%;
+}
+.bcard {
+  opacity:0.8;
+}
+.bcard-element {
+  padding-bottom: 3%;
+}
+.bottom-card {
+  font-size: xx-large;
+  font-style: italic;
+  font-weight: 300;
+  /*font-family: Georgia, 'Times New Roman', Times, serif;*/
+  color:beige;
+  text-shadow:0.03em 0.03em whitesmoke;
+  text-align: center;
+  margin-top: 1%;
+  margin-bottom: 1%;
+}
+
+</style>

@@ -39,15 +39,15 @@ app.get("/api/orders", async (req, res) => {
 
 app.get("/api/student/:studentId", async (req, res) => {
   const _id = req.params.studentId
+  // query in mongoDB
   const student = await students.findOne({ studentId: _id })
   if (student == null) {
     res.status(404).json({ _id })
     return
   }
-  // query in mongoDB
   // student.orders = await orders.find({ customerId: _id, state: { $ne: "draft" } }).toArray()
   // student. = await orders.find({ customerId: _id, state: { $ne: "draft" } }).toArray()
-  // res.status(200).json(student)
+  res.status(200).json(student)
 })
 
 app.get("/api/operator/:operatorId", async (req, res) => {
@@ -63,13 +63,13 @@ app.get("/api/operator/:operatorId", async (req, res) => {
   res.status(200).json(operator)
 })
 
-app.get("/api/customer/:customerId/draft-order", async (req, res) => {
-  const { customerId } = req.params
+app.get("/api/student/:studentId/draft-question", async (req, res) => {
+  const studentId = req.params.studentId
 
   // TODO: validate customerId
 
-  const draftOrder = await orders.findOne({ state: "draft", customerId })
-  res.status(200).json(draftOrder || { customerId, ingredientIds: [] })
+  const draftOrder = await orders.findOne({ state: "draft", studentId })
+  res.status(200).json(draftOrder || { studentId, ingredientIds: [] })
 })
 
 app.put("/api/student/:studentId/draft-question", async (req, res) => {
