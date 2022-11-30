@@ -42,6 +42,7 @@ export interface StudentWithQuestion {
 }
 
 export interface RegisteredUsers {
+  isStaff: boolean
   username: string
   password: string
 }

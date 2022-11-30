@@ -1,5 +1,5 @@
 import { MongoClient, ObjectId } from 'mongodb'
-import { StudentWithQuestion, Operator, Customer, Ingredient } from './data'
+import { StudentWithQuestion, Operator, Customer, Ingredient, RegisteredUsers } from './data'
 
 // Connection URL
 const url = 'mongodb://localhost:27017'
@@ -55,14 +55,41 @@ const students: StudentWithQuestion[] = [
   {
     studentId: "2",
     name: "Henry",
-    question: "Why Ruoxuan is so pretty",
+    question: "Why Miley is so pretty",
     position: 2,
   },
+]
+
+const users: RegisteredUsers[] = [
   {
-    studentId: "3",
-    name: "Miley",
-    question: "Why Henry is so smart",
-    position: 3,
+    isStaff: true,
+    username: "Prof Quan",
+    password: "123456",
+  },
+  {
+    isStaff: true,
+    username: "Hanze",
+    password: "123456",
+  },
+  {
+    isStaff: true,
+    username: "Chengke",
+    password: "123456",
+  },
+  {
+    isStaff: true,
+    username: "Qirui",
+    password: "123456",
+  },
+  {
+    isStaff: true,
+    username: "Sai",
+    password: "123456",
+  },
+  {
+    isStaff: false,
+    username: "Henry",
+    password: "123456",
   },
 ]
 
@@ -84,6 +111,7 @@ async function main() {
   // console.log("inserting ingredients", await db.collection("possibleIngredients").insertMany(ingredients as any))
   
   console.log("inserting students", await db.collection("students").insertMany(students as any))
+  console.log("inserting users", await db.collection("users").insertMany(users as any))
   process.exit(0)
 }
 
