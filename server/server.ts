@@ -1,12 +1,18 @@
 import express from 'express'
 import bodyParser from 'body-parser'
 import pino from 'pino'
+import session from 'express-session'
 import expressPinoLogger from 'express-pino-logger'
 import { Collection, Db, MongoClient, ObjectId } from 'mongodb'
 import { RegisteredUsers, StudentWithQuestion, DraftOrder, Order } from './data'
+import { Issuer, Strategy } from 'openid-client'
+import passport from 'passport'
+import MongoStore from 'connect-mongo'
+import { keycloak } from './secrets'
 
 // set up Mongo
-const url = 'mongodb://127.0.0.1:27017'
+const url = process.env.MONGO_URL || 'mongodb://127.0.0.1:27017'
+const mongoUrl = process.env.MONGO_URL || 'mongodb://127.0.0.1:27017'
 const client = new MongoClient(url)
 let db: Db
 let students: Collection
@@ -14,6 +20,7 @@ let customers: Collection
 let orders: Collection
 let operators: Collection
 let possibleIngredients: Collection
+let studentId: number = undefined
 
 // set up Express
 const app = express()
@@ -28,9 +35,50 @@ const logger = pino({
 })
 app.use(expressPinoLogger({ logger }))
 
+// set up session
+app.use(session({
+  secret: 'a just so-so secret',
+  resave: false,
+  saveUninitialized: true,
+  cookie: { secure: false },
+
+  // comment out the following to default to a memory-based store, which,
+  // of course, will not persist across load balanced servers
+  // or survive a restart of the server
+  store: MongoStore.create({
+    mongoUrl,
+    ttl: 14 * 24 * 60 * 60 // 14 days
+  })
+}))
+
+app.use(passport.initialize())
+app.use(passport.session())
+passport.serializeUser((user: any, done: any) => {
+  logger.info("serializeUser " + JSON.stringify(user))
+  done(null, user)
+})
+passport.deserializeUser((user: any, done: any) => {
+  logger.info("deserializeUser " + JSON.stringify(user))
+  done(null, user)
+})
+
 // app routes
 app.get("/api/possible-ingredients", async (req, res) => {
   res.status(200).json(await possibleIngredients.find().toArray())
+})
+
+app.get("/api/user", async (req, res) => {
+  res.status(200).json(req.user || {})
+})
+
+app.get("/api/user/:email", async (req, res) => {
+  let email = req.params.email
+  let student = await students.findOne({ email })
+  if(student == null) {
+    res.status(404).json({ email })
+    return
+  }
+  res.status(200).json(student)
 })
 
 app.get("/api/orders", async (req, res) => {
@@ -162,6 +210,53 @@ client.connect().then(() => {
   customers = db.collection('customers')
   possibleIngredients = db.collection('possibleIngredients')
   students = db.collection('students')
+
+  Issuer.discover("http://127.0.0.1:8081/auth/realms/office_hour_students/.well-known/openid-configuration").then(issuer => {
+    const client = new issuer.Client(keycloak)
+  
+    passport.use("oidc", new Strategy(
+      { 
+        client,
+        params: {
+          // this forces a fresh login screen every time
+          prompt: "login"
+        }
+      },
+      async (tokenSet: any, userInfo: any, done: any) => {
+        logger.info("oidc " + JSON.stringify(userInfo))
+
+        const email = userInfo.email
+        await students.updateOne(
+          { email },
+          {
+            $set: {
+              name: userInfo.name
+            }
+          },
+          { upsert: true }
+        )
+        let student = await students.findOne({ email })
+        studentId = student.studentId
+        return done(null, userInfo)
+      }
+    ))
+
+    app.get(
+      "/api/login",
+        passport.authenticate("oidc", { failureRedirect: "/api/login" }), 
+        (req, res) => {
+          res.redirect(`http://127.0.0.1:8096/redirect`)
+        }
+    )
+    
+    app.get(
+      "/api/login-callback",
+      passport.authenticate("oidc", {
+        successRedirect: `http://127.0.0.1:8096/redirect`,
+        failureRedirect: "/api/login",
+      })
+    )    
+  })
 
   // start server
   app.listen(port, () => {

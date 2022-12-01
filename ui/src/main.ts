@@ -5,6 +5,7 @@ import CustomerScreen from '@/views/StudentScreen.vue'
 import OperatorScreen from '@/views/StaffScreen.vue'
 import StatusScreen from '@/views/StatusScreen.vue'
 import SignupScreen from '@/views/SignupScreen.vue'
+import RedirectScreen from '@/views/RedirectScreen.vue'
 
 import { BootstrapVue, BootstrapVueIcons } from "bootstrap-vue"
 
@@ -21,6 +22,10 @@ const router = new VueRouter({
     {
       path: "/signup",
       component: SignupScreen,
+    },
+    {
+      path: "/redirect",
+      component: RedirectScreen,
     },
     {
       path: "/student/:studentId",

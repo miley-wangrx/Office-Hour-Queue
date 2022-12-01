@@ -39,10 +39,12 @@ export interface StudentWithQuestion {
   name: string
   question?: string
   position: number
+  email: string
 }
 
 export interface RegisteredUsers {
   isStaff: boolean
   username: string
   password: string
+  email: string
 }

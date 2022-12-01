@@ -5,7 +5,7 @@
       <p class="title"> CS590 Office Hour Queue</p>
       <div class="input-cell"><b-form-input placeholder="Enter your username" class="mb-2"/></div>
       <div class="input-cell"><b-form-input :type="'password'" placeholder="Enter your password" class="mb-2"/></div>
-      <div class="input-cell"><b-button @click="register">Register</b-button> &emsp; <b-button @click="login">Log In</b-button></div>
+      <div class="input-cell"><b-button href="/api/login">Register</b-button> &emsp; <b-button href="/api/login">Log In</b-button></div>
     </div>
     </div>
   </body>

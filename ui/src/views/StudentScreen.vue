@@ -10,11 +10,11 @@
     <b-card title="Please write down:" >
       <div class="bcard-element">
         <p class="form-section">Your name:</p>
-        <b-form-input v-model="name" class="mb-2" />
+        <b-form-input v-model="name" placeholder="John Doe" class="mb-2" />
       </div>
       <div class="bcard-element">
         <p class="form-section">In a few words, briefly explain your question:</p>
-        <b-form-textarea v-model="question" class="mb-2" rows="3" />
+        <b-form-textarea v-model="question" placeholder="I have a question about ..." class="mb-2" rows="3" />
         <em>Note: must save before submitting</em>
       </div>
         <b-button @click="save">Save</b-button> &emsp; <b-button @click="submit">Submit</b-button> 
@@ -23,11 +23,11 @@
     </b-card>
     <b-card title="Preview">
       <div class="bcard-element">
-        <p class="form-section"> Name: </p>
+        <p class="form-section"> Name: {{ student?.name }}</p>
         <p><em> {{ name }} </em></p>
       </div>
       <div class="bcard-element">
-        <p class="form-section">  Question: </p>
+        <p class="form-section">  Question: {{ student?.question }}</p>
         <p><em>{{question}} </em></p>
       </div>
     </b-card>
@@ -68,7 +68,8 @@ const props = withDefaults(defineProps<Props>(), {
 // const customer: Ref<CustomerWithOrders | null> = ref(null)
 const student: Ref<StudentWithQuestion | null> = ref(null)
 
-const name = computed(() => student.value?.name || props.studentId)
+const name: Ref<string | null> = ref(null)
+// computed(() => student.value?.name || props.studentId)
 const question: Ref<string | null> = ref(null)
 const position = computed(() => student.value?.position || 0)
 
@@ -87,8 +88,8 @@ async function refresh() {
   // student.value = await (await fetch("/api/possible-ingredients")).json()
   if (props.studentId) {
     student.value = await (await fetch("/api/student/" + encodeURIComponent(props.studentId))).json()
-    question.value = student.value?.question || 'Please enter your question'
-    draftOrderIngredientIds.value = (await (await fetch("/api/student/" + encodeURIComponent(props.studentId) + "/draft-question")).json())?.ingredientIds || []
+    // question.value = student.value?.question || 'Please enter your question'
+    // draftOrderIngredientIds.value = (await (await fetch("/api/student/" + encodeURIComponent(props.studentId) + "/draft-question")).json())?.ingredientIds || []
   }
 }
 onMounted(refresh)
