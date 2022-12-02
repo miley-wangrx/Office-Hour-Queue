@@ -2,10 +2,10 @@
   <body class="bg">
   <div class="pg">
     <div class="welcome">
-      <p> Welcome, staff </p>
+      <p> Welcome, {{ staffName }} </p>
     </div>
     <div class="form-container">
-      <p> Number of students in the queue: </p>
+      <p class="num-of-students"> Number of students in the queue: </p>
     </div>
   </div>
   </body>
@@ -13,7 +13,7 @@
     <b-jumbotron bg-variant="info" text-variant="white" :header="`Current Queue`" />
     <h2>Questions</h2>
     <b-button @click="refresh" class="mb-2">Refresh</b-button>
-    <b-table :items="studentwithquestion" :fields="fields">
+    <b-table :items="queue" :fields="fields">
       <template #cell(operatorId)="cellScope">
         <span v-if="cellScope.value">
           {{ cellScope.value }}
@@ -29,7 +29,7 @@
 
 <script setup lang="ts">
 import { onMounted, ref, computed, Ref } from 'vue'
-import { Ingredient, Operator, Order, StudentWithQuestion } from "../../../server/data"
+import { Ingredient, Operator, Order, RegisteredUsers, StudentWithQuestion } from "../../../server/data"
 
 // props
 interface Props {
@@ -42,19 +42,20 @@ const props = withDefaults(defineProps<Props>(), {
   staffName: "",
 })
 
-const operator: Ref<Operator | null> = ref(null)
-// const orders: Ref<Order[]> = ref([])
+// TODO: RegisteredUsers contains both staffs and students
+const staff: Ref<RegisteredUsers | null> = ref(null)
+// const queue: Ref<StudentWithQuestion | null> = ref(null)
 // const possibleIngredients: Ref<Ingredient[]> = ref([])
-const studentwithquestion: Ref<StudentWithQuestion[]> = ref([])
+// const orders: Ref<Order[]> = ref([])
+const queue: Ref<StudentWithQuestion[]> = ref([])
 
-const name = computed(() => operator.value?.name || props.staffName)
+const name = computed(() => staff.value?.username || props.staffName)
 
 async function refresh() {
-  // possibleIngredients.value = await (await fetch("/api/possible-ingredients")).json
   if (props.staffName) {
-    operator.value = await (await fetch("/api/staff/" + encodeURIComponent(props.staffName))).json()
+    staff.value = await (await fetch("/api/staff/" + encodeURIComponent(props.staffName))).json()
   }
-  studentwithquestion.value = await (await fetch("/api/student/")).json()
+  queue.value = await (await fetch("/api/queue/")).json()
 }
 onMounted(refresh)
 
@@ -125,8 +126,14 @@ body {
   margin-top: 2%;
   padding-top: 3%;
   padding-bottom: 2%;
-  padding-left: 2%;
+  padding-left: 3%;
+  padding-right: 3%;
   min-height: 57%;
+}
+
+.num-of-students {
+  text-align: left;
+  font-size: 25px;
 }
 
 </style>

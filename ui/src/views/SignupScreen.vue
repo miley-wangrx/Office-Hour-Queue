@@ -3,10 +3,8 @@
     <div class="pg">
     <div class="content">
       <p class="title"> CS590 Office Hour Queue</p>
-      <div class="input-cell"><b-form-input placeholder="Enter your username" class="mb-2"/></div>
-      <div class="input-cell"><b-form-input :type="'password'" placeholder="Enter your password" class="mb-2"/></div>
-      <div class="input-cell"><b-button href="/api/login">Register</b-button> &emsp; <b-button href="/api/login">Log In</b-button></div>
-    </div>
+      <!-- server.ts to switch to keycloak -->
+      <b-button href="/api/login">Sign In / Sign Up </b-button></div>
     </div>
   </body>
 </template>
@@ -66,15 +64,4 @@ body {
   color: black
 }
 
-.input-cell {
-  text-align: center;
-  padding-top: 1%;
-  padding-bottom: 1%;
-  padding-left: 1%;
-  padding-right: 1%;
-  width:300px;
-  min-width: 200px;
-  font-size: 30px;
-  font-weight: 400;
-}
 </style>

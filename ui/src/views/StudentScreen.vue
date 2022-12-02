@@ -2,7 +2,6 @@
   <body class="bg">
 
   <div class="pg">
-    <!--b-jumbotron bg-variant="white" text-variant="black" :header="`Welcome, student`" /-->
     <div class="welcome">
       <p> Welcome, student </p>
     </div>
@@ -17,7 +16,7 @@
         <b-form-textarea v-model="question" placeholder="I have a question about ..." class="mb-2" rows="3" />
         <em>Note: must save before submitting</em>
       </div>
-        <b-button @click="save">Save</b-button> &emsp; <b-button @click="submit">Submit</b-button> 
+        <b-button @click="save">Save</b-button> &emsp; <!--b-button @click="submit">Submit</b-button--> 
       <div>
       </div>
     </b-card>
@@ -67,28 +66,27 @@ const props = withDefaults(defineProps<Props>(), {
 
 // const customer: Ref<CustomerWithOrders | null> = ref(null)
 const student: Ref<StudentWithQuestion | null> = ref(null)
-
 const name: Ref<string | null> = ref(null)
 // computed(() => student.value?.name || props.studentId)
 const question: Ref<string | null> = ref(null)
 const position = computed(() => student.value?.position || 0)
 
-const draftOrderIngredientIds: Ref<string[]> = ref([])
+// const draftOrderIngredientIds: Ref<string[]> = ref([])
 const possibleIngredients: Ref<Ingredient[]> = ref([])
-const fields = ["_id", "state",
-  {
-    key: 'ingredientIds',
-    label: 'Ingredients',
-    formatter: (ingredientIds: string[]) => 
-      ingredientIds.map(_id => possibleIngredients.value.find(ingredients => ingredients._id == _id)?.name).join(', ') 
-  }
-]
+// const fields = ["_id", "state",
+//   {
+//     key: 'ingredientIds',
+//     label: 'Ingredients',
+//     formatter: (ingredientIds: string[]) => 
+//       ingredientIds.map(_id => possibleIngredients.value.find(ingredients => ingredients._id == _id)?.name).join(', ') 
+//   }
+// ]
 
 async function refresh() {
   // student.value = await (await fetch("/api/possible-ingredients")).json()
   if (props.studentId) {
     student.value = await (await fetch("/api/student/" + encodeURIComponent(props.studentId))).json()
-    // question.value = student.value?.question || 'Please enter your question'
+    question.value = student.value?.question || 'Please enter your question'
     // draftOrderIngredientIds.value = (await (await fetch("/api/student/" + encodeURIComponent(props.studentId) + "/draft-question")).json())?.ingredientIds || []
   }
 }
@@ -113,32 +111,12 @@ async function save() {
       })
     }
   )
-}
 
-async function submit() {
-  await fetch(
-    "/api/student/" + encodeURIComponent(props.studentId) + "/submit-draft-question",
-    { method: "POST" }
-  )
-  await refresh()
 }
-
-// async function save() {
-//   await fetch(
-//     "/api/customer/" + encodeURIComponent(props.customerId) + "/draft-order",
-//     {
-//       headers: {
-//         "Content-Type": "application/json",
-//       },
-//       method: "PUT",
-//       body: JSON.stringify({ ingredientIds: draftOrderIngredientIds.value })
-//     }
-//   )
-// }
 
 // async function submit() {
 //   await fetch(
-//     "/api/customer/" + encodeURIComponent(props.customerId) + "/submit-draft-order",
+//     "/api/student/" + encodeURIComponent(props.studentId) + "/submit-draft-question",
 //     { method: "POST" }
 //   )
 //   await refresh()
@@ -153,6 +131,7 @@ async function submit() {
   background-repeat: no-repeat;
   background-attachment: fixed;
   background-size: cover;
+  height: 1000px;
 }
 
 .pg {

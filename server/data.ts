@@ -29,13 +29,8 @@ export interface Operator {
   name: string
 }
 
-// export interface DraftQuestion {
-
-// }
-
-
 export interface StudentWithQuestion {
-  studentId: string
+  studentId: string // no need
   name: string
   question?: string
   position: number

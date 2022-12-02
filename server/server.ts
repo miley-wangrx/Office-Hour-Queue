@@ -18,7 +18,8 @@ let db: Db
 let students: Collection
 let customers: Collection
 let orders: Collection
-let operators: Collection
+let staffs: Collection
+// let operators: Collection
 let possibleIngredients: Collection
 let studentId: number = undefined
 
@@ -85,10 +86,10 @@ app.get("/api/orders", async (req, res) => {
   res.status(200).json(await orders.find({ state: { $ne: "draft" }}).toArray())
 })
 
-app.get("/api/student/:studentId", async (req, res) => {
-  const _id = req.params.studentId
-  // query in mongoDB
-  const student = await students.findOne({ studentId: _id })
+app.get("/api/student/:mongoId", async (req, res) => {
+  const _id = new ObjectId(req.params.mongoId)
+  // using the _id field to query in mongoDB
+  const student = await students.findOne({ _id: _id })
   if (student == null) {
     res.status(404).json({ _id })
     return
@@ -98,24 +99,23 @@ app.get("/api/student/:studentId", async (req, res) => {
   res.status(200).json(student)
 })
 
-app.get("/api/operator/:operatorId", async (req, res) => {
-  const _id = req.params.operatorId
+app.get("/api/staff/:staffName", async (req, res) => {
+  const _name = req.params.staffName
   // findOne: tell mango that only give me one, since there's only one draft order
   // hint: draft order is like a shopping cart
-  const operator = await operators.findOne({ _id })
-  if (operator == null) {
-    res.status(404).json({ _id })
+  const staff = await staffs.findOne({ _name })
+  if (staffs == null) {
+    res.status(404).json({ _name })
     return
   }
-  operator.orders = await orders.find({ operatorId: _id }).toArray()
-  res.status(200).json(operator)
+  // TODO: queue
+  // operator.orders = await orders.find({ operatorId: _id }).toArray()
+  res.status(200).json(staff)
 })
 
 app.get("/api/student/:studentId/draft-question", async (req, res) => {
   const studentId = req.params.studentId
-
   // TODO: validate customerId
-
   const draftOrder = await orders.findOne({ state: "draft", studentId })
   res.status(200).json(draftOrder || { studentId, ingredientIds: [] })
 })
@@ -124,7 +124,7 @@ app.put("/api/student/:studentId/draft-question", async (req, res) => {
     const student: StudentWithQuestion = req.body
     const result = await students.updateOne(
       {
-        studentId: req.params.studentId,
+        _id: new ObjectId(req.params.studentId),
       },
       {
         $set: {
@@ -205,7 +205,8 @@ app.put("/api/order/:orderId", async (req, res) => {
 client.connect().then(() => {
   console.log('Connected successfully to MongoDB')
   db = client.db("test")
-  operators = db.collection('operators')
+  staffs = db.collection('staffs')
+  // operators = db.collection('operators')
   orders = db.collection('orders')
   customers = db.collection('customers')
   possibleIngredients = db.collection('possibleIngredients')
