@@ -7,14 +7,14 @@
     </div>
     <b-card-group deck class="bcard">
     <b-card title="Please write down:" >
-      <div class="bcard-element">
+      <!--div class="bcard-element">
         <p class="form-section">Your name:</p>
         <b-form-input v-model="name" placeholder="John Doe" class="mb-2" />
-      </div>
+      </div-->
       <div class="bcard-element">
         <p class="form-section">In a few words, briefly explain your question:</p>
-        <b-form-textarea v-model="question" placeholder="I have a question about ..." class="mb-2" rows="3" />
-        <em>Note: must save before submitting</em>
+        <b-form-textarea v-model="question" placeholder="I have a question about ..." class="mb-2" rows="5" />
+        <!--em>Note: must save before submitting</em-->
       </div>
         <b-button @click="save">Save</b-button> &emsp; <!--b-button @click="submit">Submit</b-button--> 
       <div>
@@ -22,18 +22,18 @@
     </b-card>
     <b-card title="Preview">
       <div class="bcard-element">
-        <p class="form-section"> Name: {{ student?.name }}</p>
-        <p><em> {{ name }} </em></p>
+        <p class="form-section"> Name: </p>
+        <p><em> {{ student?.name }} </em></p>
       </div>
       <div class="bcard-element">
-        <p class="form-section">  Question: {{ student?.question }}</p>
-        <p><em>{{question}} </em></p>
+        <p class="form-section">  Question: </p>
+        <p><em>{{ question }} </em></p>
       </div>
     </b-card>
     </b-card-group>
 
     <div class="bottom-card">
-      <p> Hi {{name}}, your position in the queue is: {{position}} </p>
+      <p> Hi {{ student?.name }}, your position in the queue is: {{ position }} </p>
       <b-button @click="leaveQueue" class="mb-2">Leave the Queue</b-button>
     </div>
     <!--div>
@@ -172,7 +172,7 @@ async function save() {
   font-weight: 300;
   /*font-family: Georgia, 'Times New Roman', Times, serif;*/
   color:white;
-  text-shadow:0.03em 0.03em whitesmoke;
+  text-shadow:0.05em 0.05em black;
   text-align: center;
   margin-top: 3%;
   margin-bottom: 3%;

@@ -2,29 +2,28 @@
   <body class="bg">
   <div class="pg">
     <div class="welcome">
-      <p> Welcome, {{ staffName }} </p>
+      <p> Welcome, {{ staff?.username }} </p>
     </div>
     <div class="form-container">
-      <p class="num-of-students"> Number of students in the queue: </p>
+      <p class="num-of-students"> Number of students in the queue: {{ queue.length }} <!--b-button @click="refresh" class="mb-2">Refresh</b-button--> </p>
+      <b-table :items="queue" :fields="fields">
+        <template #cell(question)="cellScope">
+          <span v-if="cellScope.value">
+            {{ cellScope.value }}
+          </span>
+        </template>
+        <template #cell(email)="cellScope1">
+          <span v-if="cellScope1.value">
+          </span>
+          <b-button @click="markAsSolved(cellScope1.value)">
+            Mark as Solved
+          </b-button>
+        </template>
+      </b-table>
     </div>
   </div>
   </body>
-  <!--div class="mx-3 my-3">
-    <b-jumbotron bg-variant="info" text-variant="white" :header="`Current Queue`" />
-    <h2>Questions</h2>
-    <b-button @click="refresh" class="mb-2">Refresh</b-button>
-    <b-table :items="queue" :fields="fields">
-      <template #cell(operatorId)="cellScope">
-        <span v-if="cellScope.value">
-          {{ cellScope.value }}
-          <b-button @click="updateOrder(cellScope.item._id, 'done')" v-if="cellScope.value === operatorId && cellScope.item.state !== 'done'">
-            Done
-          </b-button>
-        </span>
-        <b-button v-else @click="updateOrder(cellScope.item._id, 'blending')">Start Blending</b-button>
-      </template>
-    </b-table>
-  </div-->
+  
 </template>
 
 <script setup lang="ts">
@@ -34,12 +33,12 @@ import { Ingredient, Operator, Order, RegisteredUsers, StudentWithQuestion } fro
 // props
 interface Props {
   // operatorId: string
-  staffName: string
+  staffId: string
 }
 
 // default values for props
 const props = withDefaults(defineProps<Props>(), {
-  staffName: "",
+  staffId: "",
 })
 
 // TODO: RegisteredUsers contains both staffs and students
@@ -49,41 +48,37 @@ const staff: Ref<RegisteredUsers | null> = ref(null)
 // const orders: Ref<Order[]> = ref([])
 const queue: Ref<StudentWithQuestion[]> = ref([])
 
-const name = computed(() => staff.value?.username || props.staffName)
+const name = computed(() => staff.value?.username || props.staffId)
 
 async function refresh() {
-  if (props.staffName) {
-    staff.value = await (await fetch("/api/staff/" + encodeURIComponent(props.staffName))).json()
-  }
-  queue.value = await (await fetch("/api/queue/")).json()
+
+  staff.value = await (await fetch(`/api/staff/${props.staffId}`)).json()
+  let unfiltered_queue: StudentWithQuestion[] = await (await fetch("/api/queue/")).json()
+  queue.value = unfiltered_queue.filter((student, index) => {
+    return 'question' in student
+  })
 }
 onMounted(refresh)
 
-const fields = ["Position", "Student Name", "Question"
-  // {
-  //   key: 'ingredientIds',
-  //   label: 'Ingredients',
-  //   formatter: (ingredientIds: string[]) => 
-  //     ingredientIds.map(_id => possibleIngredients.value.find(ingredients => ingredients._id == _id)?.name).join(', ') 
-  // }
-  ]
+const fields = [{key: 'position', label: 'Position'}, {key: 'name', label: 'Student Name'}, {key: 'question', label: 'Question'}, {key: 'email', label: 'Email'}]
 
-// async function updateOrder(orderId: string, state: string) {
-//   await fetch(
-//     "/api/order/" + encodeURIComponent(orderId),
-//     {
-//       headers: {
-//         "Content-Type": "application/json",
-//       },
-//       method: "PUT",
-//       body: JSON.stringify({
-//         operatorId: props.operatorId,
-//         state,
-//       })
-//     }
-//   )
-//   await refresh()
-// }
+async function markAsSolved(email: string) {
+  await fetch(
+    "/api/staff/mark",
+    {
+      headers: {
+        "Content-Type": "application/json",
+      },
+      method: "PUT",
+      body: JSON.stringify({
+        // operatorId: props.operatorId,
+        email
+      })
+    }
+  )
+  await refresh()
+}
+
 </script>
 
 <style scoped>
@@ -132,7 +127,7 @@ body {
 }
 
 .num-of-students {
-  text-align: left;
+  text-align: center;
   font-size: 25px;
 }
 

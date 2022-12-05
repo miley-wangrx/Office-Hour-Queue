@@ -9,6 +9,8 @@ import { Issuer, Strategy } from 'openid-client'
 import passport from 'passport'
 import MongoStore from 'connect-mongo'
 import { keycloak } from './secrets'
+import { rmSync } from 'fs'
+import { updateLanguageServiceSourceFile } from 'typescript'
 
 // set up Mongo
 const url = process.env.MONGO_URL || 'mongodb://127.0.0.1:27017'
@@ -18,10 +20,11 @@ let db: Db
 let students: Collection
 let customers: Collection
 let orders: Collection
-let staffs: Collection
+let users: Collection
 // let operators: Collection
 let possibleIngredients: Collection
 let studentId: number = undefined
+let queue: StudentWithQuestion[]
 
 // set up Express
 const app = express()
@@ -76,6 +79,10 @@ app.get("/api/user/:email", async (req, res) => {
   let email = req.params.email
   let student = await students.findOne({ email })
   if(student == null) {
+    let staff = await users.findOne({ email })
+    if(staff != null) {
+      return res.status(200).json(staff)
+    }
     res.status(404).json({ email })
     return
   }
@@ -99,18 +106,18 @@ app.get("/api/student/:mongoId", async (req, res) => {
   res.status(200).json(student)
 })
 
-app.get("/api/staff/:staffName", async (req, res) => {
-  const _name = req.params.staffName
-  // findOne: tell mango that only give me one, since there's only one draft order
-  // hint: draft order is like a shopping cart
-  const staff = await staffs.findOne({ _name })
-  if (staffs == null) {
-    res.status(404).json({ _name })
+app.get("/api/staff/:staffId", async (req, res) => {
+  const _id = new ObjectId(req.params.staffId)
+  const staff = await users.findOne({ _id })
+  if (staff == null) {
+    res.status(404).json({ _id })
     return
   }
-  // TODO: queue
-  // operator.orders = await orders.find({ operatorId: _id }).toArray()
   res.status(200).json(staff)
+})
+
+app.get("/api/queue", async (req, res) => {
+  res.status(200).json(await students.find().toArray())
 })
 
 app.get("/api/student/:studentId/draft-question", async (req, res) => {
@@ -118,6 +125,18 @@ app.get("/api/student/:studentId/draft-question", async (req, res) => {
   // TODO: validate customerId
   const draftOrder = await orders.findOne({ state: "draft", studentId })
   res.status(200).json(draftOrder || { studentId, ingredientIds: [] })
+})
+
+app.put("/api/staff/mark", async (req, res) => {
+  const email = req.body.email
+  await students.updateOne(
+    {
+     email: email
+    },
+    {
+      $unset: {question: ""}
+    })
+  res.status(200).json({status: "ok"})
 })
 
 app.put("/api/student/:studentId/draft-question", async (req, res) => {
@@ -205,7 +224,7 @@ app.put("/api/order/:orderId", async (req, res) => {
 client.connect().then(() => {
   console.log('Connected successfully to MongoDB')
   db = client.db("test")
-  staffs = db.collection('staffs')
+  users = db.collection('users')
   // operators = db.collection('operators')
   orders = db.collection('orders')
   customers = db.collection('customers')
@@ -227,17 +246,24 @@ client.connect().then(() => {
         logger.info("oidc " + JSON.stringify(userInfo))
 
         const email = userInfo.email
-        await students.updateOne(
-          { email },
-          {
-            $set: {
-              name: userInfo.name
-            }
-          },
-          { upsert: true }
-        )
-        let student = await students.findOne({ email })
-        studentId = student.studentId
+        const staff = await users.findOne({ email })
+        console.log(staff)
+        if (staff != null) {
+          userInfo.roles = ["staff"]
+        } else {
+          const currPosition = await students.countDocuments()
+          await students.updateOne(
+            { email },
+            {
+              $set: {
+                name: userInfo.name,
+                position: currPosition + 1
+              },
+            },
+            { upsert: true }
+          )
+          userInfo.roles = ["student"]
+        }
         return done(null, userInfo)
       }
     ))
@@ -261,6 +287,6 @@ client.connect().then(() => {
 
   // start server
   app.listen(port, () => {
-    console.log(`Smoothie server listening on port ${port}`)
+    console.log(`OH Queue server listening on port ${port}`)
   })
 })

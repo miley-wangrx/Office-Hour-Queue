@@ -33,9 +33,9 @@ const router = new VueRouter({
       props: ({ params: { studentId }}) => ({ studentId }),
     },
     {
-      path: "/staff/:staffName",
+      path: "/staff/:staffId",
       component: OperatorScreen,
-      props: ({ params: { staffName }}) => ({ staffName }),
+      props: ({ params: { staffId }}) => ({ staffId }),
     },
     {
       path: "/",
