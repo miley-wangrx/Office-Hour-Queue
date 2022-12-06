@@ -1,22 +1,16 @@
 <template>
   <body class="bg">
-
   <div class="pg">
     <div class="welcome">
       <p> Welcome, student </p>
     </div>
     <b-card-group deck class="bcard">
     <b-card title="Please write down:" >
-      <!--div class="bcard-element">
-        <p class="form-section">Your name:</p>
-        <b-form-input v-model="name" placeholder="John Doe" class="mb-2" />
-      </div-->
       <div class="bcard-element">
         <p class="form-section">In a few words, briefly explain your question:</p>
         <b-form-textarea v-model="question" placeholder="I have a question about ..." class="mb-2" rows="5" />
-        <!--em>Note: must save before submitting</em-->
       </div>
-        <b-button @click="save">Save</b-button> &emsp; <!--b-button @click="submit">Submit</b-button--> 
+        <b-button @click="save"> Submit </b-button>
       <div>
       </div>
     </b-card>
@@ -32,17 +26,10 @@
     </b-card>
     </b-card-group>
 
-    <div class="bottom-card">
+    <div class="bottom-card" v-if="position">
       <p> Hi {{ student?.name }}, your position in the queue is: {{ position }} </p>
       <b-button @click="leaveQueue" class="mb-2">Leave the Queue</b-button>
     </div>
-    <!--div>
-      <p> Total Cost: </p>
-      {{ draftOrderIngredientIds.reduce(
-        (acc, curr) => acc + (possibleIngredients.find(c => c._id == curr)?.price || 0 ), 0
-      )
-      }}
-    </div-->
   </div>
 </body>
 </template>
@@ -64,36 +51,33 @@ const props = withDefaults(defineProps<Props>(), {
   studentId: "",
 })
 
-// const customer: Ref<CustomerWithOrders | null> = ref(null)
 const student: Ref<StudentWithQuestion | null> = ref(null)
 const name: Ref<string | null> = ref(null)
-// computed(() => student.value?.name || props.studentId)
 const question: Ref<string | null> = ref(null)
 const position = computed(() => student.value?.position || 0)
 
-// const draftOrderIngredientIds: Ref<string[]> = ref([])
-const possibleIngredients: Ref<Ingredient[]> = ref([])
-// const fields = ["_id", "state",
-//   {
-//     key: 'ingredientIds',
-//     label: 'Ingredients',
-//     formatter: (ingredientIds: string[]) => 
-//       ingredientIds.map(_id => possibleIngredients.value.find(ingredients => ingredients._id == _id)?.name).join(', ') 
-//   }
-// ]
-
 async function refresh() {
-  // student.value = await (await fetch("/api/possible-ingredients")).json()
   if (props.studentId) {
     student.value = await (await fetch("/api/student/" + encodeURIComponent(props.studentId))).json()
     question.value = student.value?.question || 'Please enter your question'
-    // draftOrderIngredientIds.value = (await (await fetch("/api/student/" + encodeURIComponent(props.studentId) + "/draft-question")).json())?.ingredientIds || []
   }
 }
 onMounted(refresh)
 
-function leaveQueue() {
-
+async function leaveQueue() {
+  await fetch(
+    "/api/staff/mark",
+    {
+      headers: {
+        "Content-Type": "application/json",
+      },
+      method: "PUT",
+      body: JSON.stringify({
+        email: student.value?.email
+      })
+    }
+  )
+  await refresh()
 }
 
 async function save() {
@@ -111,16 +95,8 @@ async function save() {
       })
     }
   )
-
+  refresh()
 }
-
-// async function submit() {
-//   await fetch(
-//     "/api/student/" + encodeURIComponent(props.studentId) + "/submit-draft-question",
-//     { method: "POST" }
-//   )
-//   await refresh()
-// }
 
 </script>
 

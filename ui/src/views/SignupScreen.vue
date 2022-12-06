@@ -11,14 +11,7 @@
   
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
-  
-function login(){
 
-}
-
-function register(){
-
-}
 </script>
 
 <style scoped>

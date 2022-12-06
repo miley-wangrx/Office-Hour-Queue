@@ -129,25 +129,44 @@ app.get("/api/student/:studentId/draft-question", async (req, res) => {
 
 app.put("/api/staff/mark", async (req, res) => {
   const email = req.body.email
-  await students.updateOne(
+  const student = await students.findOne({ email })
+  const currPosition = student.position
+  const result = await students.updateOne(
     {
      email: email
     },
     {
-      $unset: {question: ""}
-    })
+      $unset: {
+        question: "",
+        position: ""
+      }
+    }
+  )
+  await students.updateMany(
+    {
+      position: {$gte: currPosition}
+    },
+    {
+      $inc: { position: -1 }
+    }
+  )
+  if(result.modifiedCount == 0) {
+    res.status(404).json({ email })
+  }
   res.status(200).json({status: "ok"})
 })
 
 app.put("/api/student/:studentId/draft-question", async (req, res) => {
     const student: StudentWithQuestion = req.body
+    const currPosition = await students.countDocuments({question: { $exists: true }})
     const result = await students.updateOne(
       {
         _id: new ObjectId(req.params.studentId),
       },
       {
         $set: {
-          question: student.question
+          question: student.question,
+          position: currPosition + 1
         }
       },
       {
@@ -156,69 +175,6 @@ app.put("/api/student/:studentId/draft-question", async (req, res) => {
     )
     res.status(200).json({ status: "ok" })
   })
-
-app.post("/api/student/:studentId/submit-draft-question", async (req, res) => {
-  const result = await students.updateOne(
-    {
-      studentId: req.params.studentId,
-    },
-    {
-      $set: {
-        // state: "queued",
-      }
-    }
-  )
-  if (result.modifiedCount === 0) {
-    res.status(400).json({ error: "no draft question" })
-    return
-  }
-  res.status(200).json({ status: "ok" })
-})
-
-app.put("/api/order/:orderId", async (req, res) => {
-  const order: Order = req.body
-  // TODO: validate order object
-  const condition: any = {
-    _id: new ObjectId(req.params.orderId),
-    state: { 
-      $in: [
-        // because PUT is idempotent, ok to call PUT twice in a row with the existing state
-        order.state
-      ]
-    },
-  }
-  switch (order.state) {
-    case "blending":
-      condition.state.$in.push("queued")
-      // can only go to blending state if no operator assigned (or is the current user, due to idempotency)
-      condition.$or = [{ operatorId: { $exists: false }}, { operatorId: order.operatorId }]
-      break
-    case "done":
-      condition.state.$in.push("blending")
-      condition.operatorId = order.operatorId
-      break
-    default:
-      // invalid state
-      res.status(400).json({ error: "invalid state" })
-      return
-  }
-  
-  const result = await orders.updateOne(
-    condition,
-    {
-      $set: {
-        state: order.state,
-        operatorId: order.operatorId,
-      }
-    }
-  )
-
-  if (result.matchedCount === 0) {
-    res.status(400).json({ error: "orderId does not exist or state change not allowed" })
-    return
-  }
-  res.status(200).json({ status: "ok" })
-})
 
 // connect to Mongo
 client.connect().then(() => {
@@ -251,13 +207,12 @@ client.connect().then(() => {
         if (staff != null) {
           userInfo.roles = ["staff"]
         } else {
-          const currPosition = await students.countDocuments()
+          
           await students.updateOne(
             { email },
             {
               $set: {
                 name: userInfo.name,
-                position: currPosition + 1
               },
             },
             { upsert: true }

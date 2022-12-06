@@ -5,7 +5,7 @@
       <p> Welcome, {{ staff?.username }} </p>
     </div>
     <div class="form-container">
-      <p class="num-of-students"> Number of students in the queue: {{ queue.length }} <!--b-button @click="refresh" class="mb-2">Refresh</b-button--> </p>
+      <p class="num-of-students"> Number of students in the queue: {{ queue.length }} </p>
       <b-table :items="queue" :fields="fields">
         <template #cell(question)="cellScope">
           <span v-if="cellScope.value">
@@ -28,11 +28,10 @@
 
 <script setup lang="ts">
 import { onMounted, ref, computed, Ref } from 'vue'
-import { Ingredient, Operator, Order, RegisteredUsers, StudentWithQuestion } from "../../../server/data"
+import { RegisteredUsers, StudentWithQuestion } from "../../../server/data"
 
 // props
 interface Props {
-  // operatorId: string
   staffId: string
 }
 
@@ -41,17 +40,12 @@ const props = withDefaults(defineProps<Props>(), {
   staffId: "",
 })
 
-// TODO: RegisteredUsers contains both staffs and students
 const staff: Ref<RegisteredUsers | null> = ref(null)
-// const queue: Ref<StudentWithQuestion | null> = ref(null)
-// const possibleIngredients: Ref<Ingredient[]> = ref([])
-// const orders: Ref<Order[]> = ref([])
 const queue: Ref<StudentWithQuestion[]> = ref([])
 
 const name = computed(() => staff.value?.username || props.staffId)
 
 async function refresh() {
-
   staff.value = await (await fetch(`/api/staff/${props.staffId}`)).json()
   let unfiltered_queue: StudentWithQuestion[] = await (await fetch("/api/queue/")).json()
   queue.value = unfiltered_queue.filter((student, index) => {
@@ -71,7 +65,6 @@ async function markAsSolved(email: string) {
       },
       method: "PUT",
       body: JSON.stringify({
-        // operatorId: props.operatorId,
         email
       })
     }

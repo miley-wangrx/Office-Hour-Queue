@@ -3,7 +3,6 @@ import VueRouter from 'vue-router'
 import App from '@/App.vue'
 import CustomerScreen from '@/views/StudentScreen.vue'
 import OperatorScreen from '@/views/StaffScreen.vue'
-import StatusScreen from '@/views/StatusScreen.vue'
 import SignupScreen from '@/views/SignupScreen.vue'
 import RedirectScreen from '@/views/RedirectScreen.vue'
 
@@ -36,10 +35,6 @@ const router = new VueRouter({
       path: "/staff/:staffId",
       component: OperatorScreen,
       props: ({ params: { staffId }}) => ({ staffId }),
-    },
-    {
-      path: "/",
-      component: StatusScreen,
     },
   ],
 })
