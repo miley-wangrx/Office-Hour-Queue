@@ -1,4 +1,6 @@
 # Office Hour Queue
+> This project will be developed based on one of my assignments in **COMPSCI590: Advanced Web Application Development** at Duke University.
+> Additional features will be added.
 
 ## Brief
 
